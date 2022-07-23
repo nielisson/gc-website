@@ -112,7 +112,7 @@ switch ($_POST["request"])
 			`type_id` = $type_id,
 			`genre_id` = $genre_id,
 			`scene_guid` = '$scene_guid'
-		";
+		WHERE `id` = $id";
 
 		if (!$conn->query($response["sql"]))
 		{
