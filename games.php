@@ -20,12 +20,13 @@ $response["message"] = "Bad Request. Some request fields are missing";
 switch ($_POST["request"])
 {
 	case "INSERT":
-		if (!isset($_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["scene_guid"]))
+		if (!isset($_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
 		$type_id = $_POST["type_id"];
 		$genre_id = $_POST["genre_id"];
+		$price = $type_id < 2 ? "NULL" : $_POST["price"];
 		$scene_guid = strip_tags($_POST["scene_guid"]);
 		$response = [
 			"sql" => "SELECT * FROM `games` WHERE `name` = '$name' OR `name` LIKE '$name'",
@@ -48,7 +49,7 @@ switch ($_POST["request"])
 			break;
 		}
 		
-		$response["sql"] = "INSERT INTO `games` (`name`, `type_id`, `genre_id`, `scene_guid`) VALUES ('$name', $type_id, $genre_id, '$scene_guid')";
+		$response["sql"] = "INSERT INTO `games` (`name`, `type_id`, `genre_id`, `price`, `scene_guid`) VALUES ('$name', $type_id, $genre_id, $price, '$scene_guid')";
 
 		if (!$conn->query($response["sql"]))
 		{
@@ -78,13 +79,14 @@ switch ($_POST["request"])
 		break;
 		
 	case "UPDATE":
-		if (!isset($_POST["id"], $_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["scene_guid"]))
+		if (!isset($_POST["id"], $_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
 			exit(json_encode($response));
 
 		$id = strip_tags($_POST["id"]);
 		$name = strip_tags($_POST["name"]);
 		$type_id = $_POST["type_id"];
 		$genre_id = $_POST["genre_id"];
+		$price = $type_id < 2 ? "NULL" : $_POST["price"];
 		$scene_guid = strip_tags($_POST["scene_guid"]);
 		$response = [
 			"sql" => "SELECT * FROM `games` WHERE `id` = $id",
@@ -111,6 +113,7 @@ switch ($_POST["request"])
 			`name` = '$name',
 			`type_id` = $type_id,
 			`genre_id` = $genre_id,
+			`price` = $price,
 			`scene_guid` = '$scene_guid'
 		WHERE `id` = $id";
 
