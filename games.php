@@ -1,7 +1,6 @@
 <?php
 
-include "connect.php";
-include "utilities.php";
+include "init.php";
 
 if (!isset($_POST) || empty($_POST))
 	exit(json_encode(GamesList()));

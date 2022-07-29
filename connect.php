@@ -2,9 +2,10 @@
 
 // Connection parameters
 $servername = "localhost";
+$is_localhost = str_contains("localhost/", $_SERVER['HTTP_HOST']);
 
 // Check if localhost
-if (str_contains("localhost/", $_SERVER['HTTP_HOST']))
+if ($is_localhost)
 {
 	$username = "root";
 	$password = "";
