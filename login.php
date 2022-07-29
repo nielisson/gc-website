@@ -2,8 +2,11 @@
 
 $response = [
 	"response" => "400",
-	"message" => "Bad Request"
+	"message" => "Bad request"
 ];
+
+/*if (isset($_GET))
+	$_POST = $_GET;*/
 
 if(!isset($_POST["username"]) || !isset($_POST["password"]))
 	exit(json_encode($response));
@@ -35,7 +38,20 @@ if(!password_verify($password, $user["password"]))
 	exit(json_encode($response));
 
 $new_code = false;
-$user_code = GetLatestUserEmailCode($user["id"], false, $new_code);
+$code_types = ["verification", "password_reset"];
+$code_iterator = 0;
+$user_code = null;
+
+while ($user_code === null && $code_iterator < count($code_types))
+{
+	$code_type = $code_types[$code_iterator];
+	$user_code = GetLatestUserEmailCode($user["id"], false, $new_code, $code_type);
+
+	$code_iterator++;
+}
+
+unset($code_types, $code_iterator);
+
 $response = [
 	"response" => "500",
 	"message" => "We've had some errors while connecting to the database",
@@ -45,18 +61,18 @@ $response = [
 if ($user_code === false)
 	exit(json_encode($response));
 
-if (isset($_POST["code"]))
+if ($user_code !== null && isset($_POST["code"]))
 {
 	$code = $_POST["code"];
 	$response = [
 		"response" => "402",
-		"message" => "Verification code is incorrect"
+		"message" => ucwords(str_replace("_", " ", $code_type)) . " code is incorrect"
 	];
 
 	if ($code !== $user_code)
 		exit(json_encode($response));
 
-	$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id]";
+	$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id] WHERE `type` = '$code_type'";
 	$query = $conn->query($sql);
 	$response = [
 		"response" => "500",
@@ -74,18 +90,30 @@ else if ($user_code !== null)
 	{
 		$response = [
 			"response" => "501",
-			"message" => "Sending the confirmation code mail has failed"
+			"message" => "Sending the activation code mail has failed"
 		];
 
 		require "mailer.php";
 
-		if (!SendVerificationMail($user["email"], $user["full_name"], $user_code))
-			exit(json_encode($response));
+		switch ($code_type)
+		{
+			case "password_reset":
+				if (!SendPasswordResetMail($user["email"], $user["full_name"], $user_code))
+					exit(json_encode($response));
+
+				break;
+
+			default:
+				if (!SendVerificationMail($user["email"], $user["full_name"], $user_code))
+					exit(json_encode($response));
+
+				break;
+		}
 	}
 
 	$response = [
 		"response" => "402",
-		"message" => "Please verify your account! We've sent an activation code to your mail inbox."
+		"message" => "Please verify your identity! We've sent an activation code to your mail inbox."
 	];
 
 	exit(json_encode($response));

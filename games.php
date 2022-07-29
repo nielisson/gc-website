@@ -1,5 +1,8 @@
 <?php
 
+/*if (isset($_GET))
+	$_POST = $_GET;*/
+
 include "init.php";
 
 if (!isset($_POST) || empty($_POST))

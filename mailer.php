@@ -15,6 +15,23 @@ function SendVerificationMail(string $to, string $name, string $code)
 
 	return SendMail($to, "Account Activation", $message, "noreply@gameconverse.com", true);
 }
+function SendPasswordResetMail(string $to, string $name, string $code)
+{
+	$message = "<b>Hi, $name!</b><br />";
+	$message .= "<br />";
+	$message .= "We've received your request to reset your Game Converse password!<br />";
+	$message .= "Your account activation code is: <b>$code</b><br />";
+	$message .= "<br />";
+	$message .= "If you think there's a problem, please contact us at support@gameconverse.com<br />";
+	$message .= "<br />";
+	$message .= "Best Regards,<br />";
+	$message .= "The Game Converse team.<br />";
+	$message .= "<br />";
+	$message .= "<br />";
+	$message .= "<br />";
+
+	return SendMail($to, "Password Reset", $message, "noreply@gameconverse.com", true);
+}
 function SendMail(string $to, string $subject, string $message, string $from, bool $is_html, ?string $reply_to = null)
 {
 	global $is_localhost;

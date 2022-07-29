@@ -5,6 +5,9 @@ $response = [
 	"message" => "Bad request"
 ];
 
+/*if (isset($_GET))
+	$_POST = $_GET;*/
+
 // Check if all POST attributes are set
 if (!isset($_POST["username"], $_POST["password"], $_POST["email"], $_POST["full_name"], $_POST["country"], $_POST["genre"]))
 	exit(json_encode($response));
@@ -111,7 +114,7 @@ if (!$query || $query->num_rows < 1)
 $user = $query->fetch_assoc();
 $user_id = $user["id"];
 $new_code = false;
-$code = GetLatestUserEmailCode($user_id, true, $new_code);
+$code = GetLatestUserEmailCode($user_id, true, $new_code, "verification");
 $response["error"] = $conn->error;
 
 unset($response["query"]);
@@ -124,7 +127,7 @@ require "mailer.php";
 
 $response = [
 	"response" => "501",
-	"message" => "Sending the confirmation code mail has failed"
+	"message" => "Sending the activation code mail has failed"
 ];
 
 if (!SendVerificationMail($email, $full_name, $code))
