@@ -1,59 +1,43 @@
 <?php
-// Include config file
-require_once "connect.php";
 
-// Define variables and initialize with empty values
-if(isset($_POST["email"])){
+$response = [
+	"response" => "400",
+	"message" => "Bad Request"
+];
 
-    $email = strip_tags($_POST["email"]);
-    $password = md5(strip_tags($_POST["password"]));
+if(!isset($_POST["username"]) || !isset($_POST["password"]))
+	exit(json_encode($response));
 
-  
-    $sql = "SELECT * FROM users WHERE email = '$email'";
+include "connect.php";
+require "utilities.php";
 
-    $result = $conn->query($sql);
-    
-    if ($result->num_rows > 0) {
-      // output data of each row
-      while($row = $result->fetch_assoc()) {
-          
-        if($row['password'] == $password){
-          $row_array['status'] = 1;
-          $row_array['username'] = $row['user_name'];
-          $row_array['uid'] = $row['user_id'];
+$username = ValidateEmail($_POST["username"]) ? SanitizeEmail($_POST["username"]) : SanitizeText($_POST["username"]);
+$password = $_POST["password"];
+$response = [
+	"response" => "403",
+	"message" => "Username or Password are invalid"
+];
 
-          echo json_encode($row_array); 
+if (!ValidateUsername($username) && !ValidateEmail($username) || !ValidatePassword($password))
+	exit(json_encode($response));
 
-        }else{
-          $row_array['message'] = "Invalid Credentials";
-          $row_array['status'] = 0;
+$query = $conn->query("SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$username'");
+$response = [
+	"response" => "404",
+	"message" => "Username or Password are incorrect"
+];
 
-          //array_push($return_arr,$row_array);
+if (!$query || $query->num_rows < 1)
+	exit(json_encode($response));
 
-          echo json_encode($row_array);
-        }
-      }
-    } else {
-      $row_array['message'] = "Invalid Credentials";
-      $row_array['status'] = 0;
+$user = $query->fetch_assoc();
 
-      //array_push($return_arr,$row_array);
+if(!password_verify($password, $user["password"]))
+	exit(json_encode($response));
 
-      echo json_encode($row_array);
-    }
-    $conn->close();
+$response = [
+	"response" => "200",
+	"message" => "Success"
+];
 
-
-}
-  ?>
-
-  <html>
-
-<!--  <form id="form1" name="form1" method="post" action="login.php">
-<label for="email">email</label><input type="text" name="email" id="email" />
-<br class="clear" /> 
-<label for="password">password</label><input type="text" name="password" id="password" />
-<br class="clear" /> 
-<input type ="submit" name = "submit" value="submit">
-</form>-->
-  </html>
+exit(json_encode($response));

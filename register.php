@@ -1,146 +1,109 @@
 <?php
-// Include config file
-require_once "connect.php";
 
-function generate_playerid ($length_of_string) { 
-      
-    // md5 the timestamps and returns substring 
-    // of specified length 
-    return substr(md5(time()), 0, $length_of_string); 
-} 
+$response = [
+	"response" => "400",
+	"message" => "Bad request"
+];
 
-function generate_vcode($length_of_string2) 
-{ 
-  
-    // String of all alphanumeric character 
-    $str_result2 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'; 
-  
-    // Shufle the $str_result and returns substring 
-    // of specified length 
-    return substr(str_shuffle($str_result2),  
-                       0, $length_of_string2); 
-} 
+if (!isset($_POST["username"], $_POST["password"], $_POST["email"], $_POST["fullname"], $_POST["country"], $_POST["genre"]))
+	exit(json_encode($response));
 
+include "connect.php";
+require "utilities.php";
 
-function generate_rname() 
-{ 
-  
+$username = $_POST["username"];
+$password = $_POST["password"];
+$email = $_POST["email"];
+$fullname = $_POST["fullname"];
+$country = intval($_POST["country"]);
+$genre = intval($_POST["genre"]);
+$response = [
+	"response" => "401",
+	"message" => "A valid username has to contain at least 6 characters and cannot have any symbols except for '.', '_' and '-'"
+];
 
-$names = array("Unslot", "Wibo", "Tenka");
-$randNameVAL = rand(0, 2);
+if (!ValidateUsername($username))
+	exit(json_encode($response));
 
-return $names[$randNameVAL].rand(111,9999);
+$response["message"] = "A valid password has to contain at least 8 characters. It must include a number, one upper and one lower letter.";
 
-} 
- 
-// Define variables and initialize with empty values
-if(isset($_POST["email"])){
-    
-  $regex =  '/^([a-zA-Z0-9\.]+@+[a-zA-Z]+(\.)+[a-zA-Z]{2,3})$/';
+if (!ValidatePassword($password))
+	exit(json_encode($response));
 
-  if(preg_match($regex, $_POST["email"])){
+$response["message"] = "A valid Email is required";
 
-    $email = strip_tags($_POST["email"]);
-    $username = strip_tags($_POST["username"]);
-    $password = strip_tags($_POST["password"]);
-    $conpassword  = strip_tags($_POST["conpassword"]);
-    $genre = strip_tags($_POST["genre"]);
-    $city = strip_tags($_POST["city"]);
-    $country = strip_tags($_POST["country"]);
+if (!ValidateEmail($email))
+	exit(json_encode($response));
 
-  
-        $sql2 = "SELECT * FROM users WHERE email = '$email' OR user_name = '$username'";
-        
+$response["message"] = "A valid Full Name is required";
 
-        $result = $conn->query($sql2);
+if (!ValidateName($fullname))
+	exit(json_encode($response));
 
-        if ($result->num_rows > 0) {
+$response["message"] = "A valid Country is required";
+$countries = CountriesList();
 
-          $row_array['message'] = "User With This Username/Email Already Exists";
-          $row_array['status'] = 1;
-  //$row_array['col2'] = $row['col2'];
+if ($country < 0 || $country >= count($countries))
+	exit(json_encode($response));
 
-          //array_push($return_arr,$row_array);
-          echo json_encode($row_array);
+$response["message"] = "A valid Favorite Game Genre is required";
+$genres = GameGenresList();
 
-        }else{
-          if($password == $conpassword){
-            $date = date("Y-m-d");
-            $uid = generate_vcode(15);
-            $vcode = generate_vcode(10);
-            //$username = $username."_".generate_vcode(4);
-    
-            $password = md5($password);
-    
-            $sql = "INSERT INTO users (user_id, email, password, membership_date, user_name, fav_game_genre, city, country) VALUES ('$uid', '$email', '$password','$date','$username', $genre, '$city', '$country')";
-            
-    
-            if ($conn->query($sql) === TRUE) {
-              //echo "New record created successfully";
-    
-                $row_array['message'] = "New record created successfully";
-                $row_array['status'] = 2;
+if ($genre < 0 || $genre >= count($genres))
+	exit(json_encode($response));
 
-                echo json_encode($row_array);
-    
-/*                 $to = "$email";
-                $subject = "KICK : Your Verification Code";
-                
-                $message = "<b>This is Your Verification Code to Complete Your Sign Up Process On Kick.</b>";
-                $message .= "<h1>$vcode</h1>";
-                
-                $header = "From:kick@imaginarium.com \r\n";
-                $header .= "Cc:help@imaginarium.com \r\n";
-                $header .= "MIME-Version: 1.0\r\n";
-                $header .= "Content-type: text/html\r\n";
-                
-                $retval = mail ($to,$subject,$message,$header);
-                
-                if( $retval == true ) {
-                   //echo "Message sent successfully...";
-                }else {
-                  // echo "Message could not be sent...";
-                } */
-    
-                //array_push($return_arr,$row_array);
-    
-            } else {
-              //echo "Error: " . $sql . "<br>" . $conn->error;
-              $row_array['message'] = "Error: " . $sql . "<br>" . $conn->error;
-              $row_array['status'] = 0;
-      //$row_array['col2'] = $row['col2'];
-    
-              //array_push($return_arr,$row_array);
-              echo json_encode($row_array);
-    
-            }
-            
-       
-            $conn->close();
-        }
-        }
-  }else{
-    $row_array['message'] = "Please Provide A Valid Email Address";
-              $row_array['status'] = 0;
-      //$row_array['col2'] = $row['col2'];
-    
-              //array_push($return_arr,$row_array);
-              echo json_encode($row_array);
-  }
-}
-  ?>
+$username = SanitizeText($_POST["username"]);
+$password = EncryptPassword($_POST["password"]);
+$email = SanitizeEmail($_POST["email"]);
+$fullname = SanitizeText($_POST["fullname"]);
+$country++;
+$genre++;
 
-  <html>
+$sql = "SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$email'";
+$query = $conn->query($sql);
+$response = [
+	"response" => "500",
+	"message" => "Error while connecting to our databases",
+	"query" => $sql,
+	"error" => $conn->error
+];
 
-  <form id="form1" name="form1" method="post" action="register.php">
-  <label for="email">Username</label><input type="text" name="username" id="username" />
-<br class="clear" /> 
-<label for="email">email</label><input type="text" name="email" id="email" />
-<br class="clear" /> 
-<label for="password">password</label><input type="password" name="password" id="password" />
-<br class="clear" /> 
-<label for="conpassword">conpassword</label><input type="password" name="conpassword" id="conpassword" />
-<br class="clear" /> 
-<input type ="submit" name = "submit" value="submit">
-</form>
-  </html>
+if (!$query)
+	exit(json_encode($response));
+
+$response = [
+	"response" => "403",
+	"message" => "The used Username or Email is already in use!"
+];
+
+if ($query->num_rows > 0)
+	exit(json_encode($response));
+
+/*
+require "mailer.php";
+
+Send Email
+
+if email not sent
+	exit a 501 response code
+*/
+
+$time = (new DateTime())->format("Y-m-d H:i:s");
+$sql = "INSERT INTO `users`(`username`, `password`, `email`, `fullname`, `country`, `fav_game_genre`, `membership_time`) VALUES ('$username', '$password', '$email', '$fullname', $country, $genre, '$time')";
+$query = $conn->query($sql);
+$response = [
+	"response" => "500",
+	"message" => "Error while connecting to our databases",
+	"query" => $sql,
+	"error" => $conn->error
+];
+
+if (!$query)
+	exit(json_encode($response));
+
+$response = [
+	"response" => "200",
+	"message" => "Success"
+];
+
+exit(json_encode($response));
