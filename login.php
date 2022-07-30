@@ -72,7 +72,7 @@ if ($user_code !== null && isset($_POST["code"]))
 	if ($code !== $user_code)
 		exit(json_encode($response));
 
-	$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id] WHERE `type` = '$code_type'";
+	$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id] AND `type` = '$code_type'";
 	$query = $conn->query($sql);
 	$response = [
 		"response" => "500",
@@ -83,6 +83,22 @@ if ($user_code !== null && isset($_POST["code"]))
 
 	if (!$query)
 		exit(json_encode($response));
+
+	$games = GamesList();
+
+	foreach ($games as $game)
+	{
+		if (intval($game["type_id"]) !== 1)
+			continue;
+
+		$sql = "INSERT INTO `users_games`(`user_id`, `game_id`) VALUES ($user[id], $game[id])";
+		$query = $conn->query($sql);
+		$response["error"] = $conn->error;
+		$response["query"] = $sql;
+
+		if (!$query)
+			exit(json_encode($response));
+	}
 }
 else if ($user_code !== null)
 {
