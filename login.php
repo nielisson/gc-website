@@ -80,6 +80,17 @@ if ($user_code !== null && isset($_POST["code"]) && $code_type === "verification
 		if (intval($game["type_id"]) !== 1)
 			continue;
 
+		$sql = "SELECT * FROM `users_games` WHERE `user_id` = $user[id] AND `game_id` = $game[id]";
+		$query = $conn->query($sql);
+		$response["error"] = $conn->error;
+		$response["query"] = $sql;
+
+		if (!$query)
+			exit(json_encode($response));
+
+		if ($query->num_rows > 0)
+			continue;
+
 		$sql = "INSERT INTO `users_games`(`user_id`, `game_id`) VALUES ($user[id], $game[id])";
 		$query = $conn->query($sql);
 		$response["error"] = $conn->error;

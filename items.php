@@ -6,12 +6,12 @@
 include "init.php";
 
 if (!isset($_POST) || empty($_POST))
-	exit(json_encode(GamesList()));
+	exit(json_encode(ItemsList()));
 
 $response = [
 	"response" => "400",
 	"message" => "Bad Request. A valid request is required",
-	"sql" => "None"
+	"query" => "None"
 ];
 
 if (!isset($_POST["request"]) || $_POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
@@ -22,21 +22,18 @@ $response["message"] = "Bad Request. Some request fields are missing";
 switch ($_POST["request"])
 {
 	case "INSERT":
-		if (!isset($_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
+		if (!isset($_POST["name"], $_POST["price"]))
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
-		$type_id = $_POST["type_id"];
-		$genre_id = $_POST["genre_id"];
-		$price = $type_id < 2 ? "NULL" : $_POST["price"];
-		$scene_guid = strip_tags($_POST["scene_guid"]);
+		$price = $_POST["price"];
 		$response = [
-			"sql" => "SELECT * FROM `games` WHERE `name` = '$name' OR `name` LIKE '$name'",
+			"query" => "SELECT * FROM `items` WHERE `name` = '$name' OR `name` LIKE '$name'",
 			"response" => "200",
 			"message" => "Success"
 		];
 
-		if (!($query = $conn->query($response["sql"])))
+		if (!($query = $conn->query($response["query"])))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
@@ -46,22 +43,22 @@ switch ($_POST["request"])
 		else if ($query->num_rows > 0)
 		{
 			$response["response"] = "403";
-			$response["message"] = "A game named '$name' already exists in the database";
+			$response["message"] = "A item named '$name' already exists in the database";
 
 			break;
 		}
 		
-		$response["sql"] = "INSERT INTO `games` (`name`, `type_id`, `genre_id`, `price`, `scene_guid`) VALUES ('$name', $type_id, $genre_id, $price, '$scene_guid')";
+		$response["query"] = "INSERT INTO `items`(`name`, `price`) VALUES ('$name', $price)";
 
-		if (!$conn->query($response["sql"]))
+		if (!$conn->query($response["query"]))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
 		}
 
-		$response["sql"] = "SELECT * FROM `games` WHERE `name` = '$name' OR `name` LIKE '$name'";
+		$response["query"] = "SELECT * FROM `items` WHERE `name` = '$name' OR `name` LIKE '$name'";
 
-		if (!($query = $conn->query($response["sql"])))
+		if (!($query = $conn->query($response["query"])))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
@@ -71,32 +68,29 @@ switch ($_POST["request"])
 		else if ($query->num_rows < 1)
 		{
 			$response["response"] = "401";
-			$response["message"] = "The game has not been added for some unknown reason";
+			$response["message"] = "The item has not been added for some unknown reason";
 
 			break;
 		}
 
-		$response["game"] = $query->fetch_assoc();
+		$response["item"] = $query->fetch_assoc();
 
 		break;
 		
 	case "UPDATE":
-		if (!isset($_POST["id"], $_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
+		if (!isset($_POST["id"], $_POST["name"], $_POST["price"]))
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
 		$name = strip_tags($_POST["name"]);
-		$type_id = $_POST["type_id"];
-		$genre_id = $_POST["genre_id"];
-		$price = $type_id < 2 ? "NULL" : $_POST["price"];
-		$scene_guid = strip_tags($_POST["scene_guid"]);
+		$price = $_POST["price"];
 		$response = [
-			"sql" => "SELECT * FROM `games` WHERE `id` = $id",
+			"query" => "SELECT * FROM `items` WHERE `id` = $id",
 			"response" => "200",
 			"message" => "Success"
 		];
 
-		if (!($query = $conn->query($response["sql"])))
+		if (!($query = $conn->query($response["query"])))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
@@ -106,20 +100,17 @@ switch ($_POST["request"])
 		else if ($query->num_rows < 1)
 		{
 			$response["response"] = "403";
-			$response["message"] = "A game with the ID of '$id' does not exist in the database or has been removed";
+			$response["message"] = "A item with the ID of '$id' does not exist in the database or has been removed";
 
 			break;
 		}
 		
-		$response["sql"] = "UPDATE `games` SET
+		$response["query"] = "UPDATE `items` SET
 			`name` = '$name',
-			`type_id` = $type_id,
-			`genre_id` = $genre_id,
-			`price` = $price,
-			`scene_guid` = '$scene_guid'
+			`price` = $price
 		WHERE `id` = $id";
 
-		if (!$conn->query($response["sql"]))
+		if (!$conn->query($response["query"]))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
@@ -127,9 +118,9 @@ switch ($_POST["request"])
 			break;
 		}
 
-		$response["sql"] = "SELECT * FROM `games` WHERE `id` = $id";
+		$response["query"] = "SELECT * FROM `items` WHERE `id` = $id";
 
-		if (!($query = $conn->query($response["sql"])))
+		if (!($query = $conn->query($response["query"])))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
@@ -139,12 +130,12 @@ switch ($_POST["request"])
 		else if ($query->num_rows < 1)
 		{
 			$response["response"] = "404";
-			$response["message"] = "The game cannot be found for some reason";
+			$response["message"] = "The item cannot be found for some reason";
 
 			break;
 		}
 
-		$response["game"] = $query->fetch_assoc();
+		$response["item"] = $query->fetch_assoc();
 
 		break;
 
@@ -154,12 +145,12 @@ switch ($_POST["request"])
 
 		$id = $_POST["id"];
 		$response = [
-			"sql" => "SELECT * FROM `games` WHERE `id` = $id",
+			"query" => "SELECT * FROM `items` WHERE `id` = $id",
 			"response" => "200",
 			"message" => "Success"
 		];
 
-		if (!($query = $conn->query($response["sql"])))
+		if (!($query = $conn->query($response["query"])))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;
@@ -169,14 +160,14 @@ switch ($_POST["request"])
 		else if ($query->num_rows < 1)
 		{
 			$response["response"] = "403";
-			$response["message"] = "A game with the ID of '$id' does not exist in the database or has been removed already";
+			$response["message"] = "A item with the ID of '$id' does not exist in the database or has been removed already";
 
 			break;
 		}
 		
-		$response["sql"] = "DELETE FROM `games` WHERE `id` = $id";
+		$response["query"] = "DELETE FROM `items` WHERE `id` = $id";
 
-		if (!$conn->query($response["sql"]))
+		if (!$conn->query($response["query"]))
 		{
 			$response["response"] = "500";
 			$response["message"] = $conn->error;

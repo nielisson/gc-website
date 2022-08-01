@@ -24,7 +24,19 @@ function GameGenresList()
 
 	return $array;
 }
-function GameTypesList()
+function ItemsList()
+{
+	global $conn;
+
+	$query = $conn->query("SELECT * FROM `items` ORDER BY `id`");
+	$array = [];
+
+	while ($query && $row = $query->fetch_assoc())
+		$array[] = $row;
+
+	return $array;
+}
+function ItemAndGameTypesList()
 {
 	global $conn;
 
