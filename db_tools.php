@@ -40,7 +40,7 @@ function ItemAndGameTypesList()
 {
 	global $conn;
 
-	$query = $conn->query("SELECT * FROM `game_types` ORDER BY `name`");
+	$query = $conn->query("SELECT * FROM `item_game_types` ORDER BY `name`");
 	$array = [];
 	
 	while ($query && $row = $query->fetch_assoc())
