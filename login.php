@@ -37,15 +37,14 @@ $user = $query->fetch_assoc();
 if(!password_verify($password, $user["password"]))
 	exit(json_encode($response));
 
-$new_code = false;
-$code_types = ["verification", "password_reset"];
+$code_types = ["verification"/*, "password_reset"*/];
 $code_iterator = 0;
 $user_code = null;
 
 while ($user_code === null && $code_iterator < count($code_types))
 {
 	$code_type = $code_types[$code_iterator];
-	$user_code = GetLatestUserEmailCode($user["id"], false, $new_code, $code_type);
+	$user_code = GetLatestUserEmailCode($user["id"], false, $code_type);
 
 	$code_iterator++;
 }
@@ -55,37 +54,27 @@ unset($code_types, $code_iterator);
 $response = [
 	"response" => "500",
 	"message" => "We've had some errors while connecting to the database",
-	"error" => $conn->error
+	"error" => $conn->error,
+	"user_code" => $user_code
 ];
 
 if ($user_code === false)
 	exit(json_encode($response));
 
-if ($user_code !== null && isset($_POST["code"]))
+if ($user_code !== null && isset($_POST["code"]) && $code_type === "verification")
 {
 	$code = $_POST["code"];
 	$response = [
 		"response" => "402",
-		"message" => ucwords(str_replace("_", " ", $code_type)) . " code is incorrect"
+		"message" => ucwords(str_replace("_", " ", $code_type)) . " code is incorrect",
+		"user_code" => $response["user_code"]
 	];
 
 	if ($code !== $user_code)
 		exit(json_encode($response));
 
-	$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id] AND `type` = '$code_type'";
-	$query = $conn->query($sql);
-	$response = [
-		"response" => "500",
-		"message" => "We've had some errors while connecting to the database",
-		"query" => $sql,
-		"error" => $conn->error
-	];
-
-	if (!$query)
-		exit(json_encode($response));
-
 	$games = GamesList();
-
+	
 	foreach ($games as $game)
 	{
 		if (intval($game["type_id"]) !== 1)
@@ -99,37 +88,51 @@ if ($user_code !== null && isset($_POST["code"]))
 		if (!$query)
 			exit(json_encode($response));
 	}
+
+	unset($games);
+
+	$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id] AND `type` = '$code_type'";
+	$query = $conn->query($sql);
+	$response = [
+		"response" => "500",
+		"message" => "We've had some errors while connecting to the database",
+		"query" => $sql,
+		"error" => $conn->error,
+		"user_code" => $response["user_code"]
+	];
+
+	if (!$query)
+		exit(json_encode($response));
 }
 else if ($user_code !== null)
 {
-	if ($new_code)
+	$response = [
+		"response" => "501",
+		"message" => "Sending the activation code mail has failed",
+		"user_code" => $response["user_code"]
+	];
+
+	require "mailer.php";
+
+	switch ($code_type)
 	{
-		$response = [
-			"response" => "501",
-			"message" => "Sending the activation code mail has failed"
-		];
+		case "password_reset":
+			if (!SendPasswordResetMail($user["email"], $user["full_name"], $user_code))
+				exit(json_encode($response));
 
-		require "mailer.php";
+			break;
 
-		switch ($code_type)
-		{
-			case "password_reset":
-				if (!SendPasswordResetMail($user["email"], $user["full_name"], $user_code))
-					exit(json_encode($response));
+		default:
+			if (!SendVerificationMail($user["email"], $user["full_name"], $user_code))
+				exit(json_encode($response));
 
-				break;
-
-			default:
-				if (!SendVerificationMail($user["email"], $user["full_name"], $user_code))
-					exit(json_encode($response));
-
-				break;
-		}
+			break;
 	}
 
 	$response = [
 		"response" => "402",
-		"message" => "Please verify your identity! We've sent an activation code to your mail inbox."
+		"message" => "Please verify your identity! We've sent an activation code to your mail inbox.",
+		"user_code" => $response["user_code"]
 	];
 
 	exit(json_encode($response));

@@ -38,11 +38,38 @@ if (!$query)
 if ($query->num_rows > 0)
 {
 	$user = $query->fetch_assoc();
-	$new_code = false;
+	$user_code = GetLatestUserEmailCode($user["id"], true, "password_reset");
+	$response["error"] = $conn->error;
 
-	if (GetLatestUserEmailCode($user["id"], false, $new_code, "verification"))
+	unset($response["query"]);
+
+	if ($user_code === false)
+		exit(json_encode($response));
+
+	if (isset($_POST["code"]) && $_POST["code"] === $user_code)
 	{
-		$sql = "DELETE FROM `email_codes` WHERE `user_id` = $user[id] AND `type` = 'verification'";
+		if (GetLatestUserEmailCode($user["id"], false, "verification"))
+		{
+			$games = GamesList();
+		
+			foreach ($games as $game)
+			{
+				if (intval($game["type_id"]) !== 1)
+					continue;
+		
+				$sql = "INSERT INTO `users_games`(`user_id`, `game_id`) VALUES ($user[id], $game[id])";
+				$query = $conn->query($sql);
+				$response["error"] = $conn->error;
+				$response["query"] = $sql;
+		
+				if (!$query)
+					exit(json_encode($response));
+			}
+
+			unset($games);
+		}
+
+		$sql =	"DELETE FROM `email_codes` WHERE `user_id` = $user[id]";
 		$query = $conn->query($sql);
 		$response["query"] = $sql;
 		$response["error"] = $conn->error;
@@ -50,24 +77,28 @@ if ($query->num_rows > 0)
 		if (!$query)
 			exit(json_encode($response));
 	}
+	else
+	{
+		require "mailer.php";
 
-	$code = GetLatestUserEmailCode($user["id"], true, $new_code, "password_reset");
-	$response["error"] = $conn->error;
+		$response = [
+			"response" => "501",
+			"message" => "Sending the activation code mail has failed"
+		];
 
-	unset($response["query"]);
+		if (!SendPasswordResetMail($email, $user["full_name"], $user_code))
+			exit(json_encode($response));
 
-	if ($code === false)
-		exit(json_encode($response));
-
-	require "mailer.php";
-
-	$response = [
-		"response" => "501",
-		"message" => "Sending the activation code mail has failed"
-	];
-
-	if (!SendPasswordResetMail($email, $user["full_name"], $code))
-		exit(json_encode($response));
+		if (isset($_POST["code"]))
+		{
+			$response = [
+				"response" => "402",
+				"message" => "Please verify your identity! We've sent an activation code to your mail inbox."
+			];
+			
+			exit(json_encode($response));
+		}
+	}
 }
 
 $response = [

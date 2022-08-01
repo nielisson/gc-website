@@ -60,11 +60,10 @@ function DisposableEmailDomains()
 
 	return $array;
 }
-function GetLatestUserEmailCode(int $user_id, bool $regenerate, bool &$new_code, string $type)
+function GetLatestUserEmailCode(int $user_id, bool $regenerate, string $type)
 {
 	global $conn;
 
-	$new_code = false;
 	$sql = "SELECT * FROM `email_codes` WHERE `user_id` = $user_id AND `type` = '$type' ORDER BY `time` DESC";
 	$query = $conn->query($sql);
 
@@ -86,14 +85,12 @@ function GetLatestUserEmailCode(int $user_id, bool $regenerate, bool &$new_code,
 		if (!$query)
 			return false;
 
-		$code = RandomString(6, false, false, true, false);
+		$code = RandomString(4, false, false, true, false);
 		$sql = "INSERT INTO `email_codes` (`user_id`, `code`, `time`, `type`) VALUES ($user_id, '$code', '$time', '$type')";
 		$query = $conn->query($sql);
 
 		if (!$query)
 			return false;
-
-		$new_code = true;
 
 		return $code;
 	}

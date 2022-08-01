@@ -113,8 +113,7 @@ if (!$query || $query->num_rows < 1)
 // Retrieve latest email code for the newly created user
 $user = $query->fetch_assoc();
 $user_id = $user["id"];
-$new_code = false;
-$code = GetLatestUserEmailCode($user_id, true, $new_code, "verification");
+$code = GetLatestUserEmailCode($user_id, true, "verification");
 $response["error"] = $conn->error;
 
 unset($response["query"]);
