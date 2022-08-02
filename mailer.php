@@ -1,5 +1,13 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require "phpmailer/src/Exception.php";
+require "phpmailer/src/PHPMailer.php";
+require "phpmailer/src/SMTP.php";
+
 function SendVerificationMail(string $to, string $name, string $code)
 {
 	$message = "<b>Hi, $name!</b><br />";
@@ -13,7 +21,7 @@ function SendVerificationMail(string $to, string $name, string $code)
 	$message .= "<br />";
 	$message .= "<br />";
 
-	return SendMail($to, "Account Activation", $message, "noreply@gameconverse.com", true);
+	return SendMail($to, $name, "Account Activation", $message, "noreply@gamesconverse.fun", true);
 }
 function SendPasswordResetMail(string $to, string $name, string $code)
 {
@@ -22,7 +30,7 @@ function SendPasswordResetMail(string $to, string $name, string $code)
 	$message .= "We've received your request to reset your Game Converse password!<br />";
 	$message .= "Your account activation code is: <b>$code</b><br />";
 	$message .= "<br />";
-	$message .= "If you think there's a problem, please contact us at support@gameconverse.com<br />";
+	$message .= "If you think there's a problem, please contact us at support@gamesconverse.fun<br />";
 	$message .= "<br />";
 	$message .= "Best Regards,<br />";
 	$message .= "The Game Converse team.<br />";
@@ -30,9 +38,9 @@ function SendPasswordResetMail(string $to, string $name, string $code)
 	$message .= "<br />";
 	$message .= "<br />";
 
-	return SendMail($to, "Password Reset", $message, "noreply@gameconverse.com", true);
+	return SendMail($to, $name, "Password Reset", $message, "noreply@gamesconverse.fun", true);
 }
-function SendMail(string $to, string $subject, string $message, string $from, bool $is_html, ?string $reply_to = null)
+function SendMail(string $to, string $name, string $subject, string $body, string $from, bool $is_html, ?string $reply_to = null)
 {
 	global $is_localhost;
 
@@ -42,9 +50,52 @@ function SendMail(string $to, string $subject, string $message, string $from, bo
 	if (empty($reply_to))
 		$reply_to = $from;
 
-	$mail_headers =	"From: $from\r\nReply-To: $reply_to\r\n" .
-					($is_html ? "Content-type: text/html\r\n" : "") .
-					"X-Mailer: PHP/" . phpversion();
-	
-	return mail($to, $subject, $message, $mail_headers);
+	// PHPMailer SMTP Configurations 
+	$mailer_host = "mail.gamesconverse.fun";
+	$mailer_username = $from;
+	$mailer_password = "gcgc2022*";
+	$mailer_secure = $is_localhost ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
+	$mailer_port = $is_localhost ? 587 : 465;
+
+	try
+	{
+		$mail				= new PHPMailer(false);
+		$mail->isSMTP();											// Send using SMTP
+		$mail->SMTPDebug	= SMTP::DEBUG_OFF;						// Enable verbose debug output
+		$mail->Host			= $mailer_host;							// Set the SMTP server to send through
+		$mail->SMTPAuth		= true;									// Enable SMTP authentication
+		$mail->Username		= $mailer_username;						// SMTP username
+		$mail->Password		= $mailer_password;						// SMTP password
+		$mail->SMTPSecure	= $mailer_secure;						// Enable TLS encryption `PHPMailer::ENCRYPTION_STARTTLS`; `PHPMailer::ENCRYPTION_SMTPS` is encouraged
+		$mail->Port			= $mailer_port;							// Port 587 for TLS; 465 for SSL
+		//Recipients
+		$mail->Sender = $from;
+		$mail->setFrom($from, "Game Converse Team");
+		$mail->addReplyTo($reply_to, "Game Converse Team");
+		$mail->addAddress($to, $name);								// Add a recipient
+		//Content
+		$mail->isHTML($is_html);									// Set email format to HTML
+		$mail->Subject		= $subject;
+		$mail->Body			= $body;
+		//$mail->AltBody	= $message;
+		//$mail->addAttachment('images/example.png');
+		// SMTP Options
+		$mail->SMTPOptions = [
+			"ssl" => [
+				"verify_peer" => false,
+				"verify_peer_name" => false,
+				"allow_self_signed" => true
+			]
+		];
+
+		//Send Mail
+		return $mail->send();
+	}
+	catch (Exception $e)
+	{
+		//echo "error";
+		//echo "Mail could not be sent. Error: {$mail->ErrorInfo}";
+	}
+
+	return false;
 }
