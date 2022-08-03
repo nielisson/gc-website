@@ -1,0 +1,66 @@
+<Files ~ "^\.(htaccess|htpasswd)$">
+	order allow,deny
+	deny from all
+</Files>
+<Files ~ "^\index$">
+	order allow,deny
+	deny from all
+</Files>
+<FilesMatch "\.(jpg|png|gif|js|css|ico|swf)$">
+	#Header set cache-Control: "max-age=572800, must-revalidate"
+	Header set cache-Control: "max-age=1, must-revalidate"
+</FilesMatch>
+<IfModule mod_headers.c>
+	Header set P3P "policyref=\"/w3c/p3p.xml\", CP=\"IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT\""
+</IfModule>
+
+Options -Indexes
+DirectoryIndex index.html
+order deny,allow
+Header unset ETag
+FileETag None
+
+# Force SSL
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+
+# Run HTML without filename extension
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html
+
+# Return 404 if original request is .html
+RewriteEngine on
+RewriteCond %{THE_REQUEST} "^[^ ]* .*?\.html[? ].*$"
+RewriteRule .* - [L,R=404]
+
+# Run PHP without filename extension
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php
+
+# Return 404 if original request is .php
+RewriteEngine on
+RewriteCond %{THE_REQUEST} "^[^ ]* .*?\.php[? ].*$"
+RewriteRule .* - [L,R=404]
+
+# Replace get values with slashes
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} !-d 
+RewriteCond %{REQUEST_FILENAME}\.php -f 
+RewriteRule ^([^/]+)/?$ $1.php [L]
+RewriteCond %{REQUEST_FILENAME} -d [OR]
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^ - [L]
+RewriteRule ^([^/]+)/([^/]+)/?$ $1.php?get1=$2 [L,QSA]
+RewriteRule ^([^/]+)/([^/]+)/([^/]+)/?$ $1.php?get1=$2&get2=$3 [L,QSA]
+RewriteRule ^([^/]+)/([^/]+)/([^/]+)/([^/]+)/?$ $1.php?get1=$2&get2=$3&get3=$4 [L,QSA]
+RewriteRule ^([^/]+)/([^/]+)/([^/]+)/([^/]+)/([^/]+)/?$ $1.php?get1=$2&get2=$3&get3=$4&get4=$5 [L,QSA]
+
+# Redirect 403 error
+ErrorDocument 403 https://gamesconverse.fun/403
+# Redirect 500 error
+ErrorDocument 500 https://gamesconverse.fun/500
