@@ -21,14 +21,14 @@ $response = [
 	"result" => null
 ];
 
-if (!ValidateUsername($username))
+if (!ValidateUsername($username) && !ValidateEmail($username))
 	exit(json_encode($response));
 
 $username = SanitizeText($username);
 $response = [
 	"response" => "404",
 	"message" => "Username not found",
-	"query" => "SELECT * FROM `users` WHERE `username` = '$username'",
+	"query" => "SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$username'",
 	"result" => null
 ];
 $query = $conn->query($response["query"]);

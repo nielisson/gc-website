@@ -79,6 +79,32 @@ if ($query->num_rows > 0)
 
 			unset($games);
 		}
+		else if (GetLatestUserEmailCode($user["id"], false, "password_reset"))
+		{
+			if (!isset($_POST["new_password"]))
+				goto skip_code_delete;
+
+			$new_password = $_POST["new_password"];
+
+			if (!ValidatePassword($new_password))
+			{
+				$response = [
+					"response" => "401",
+					"message" => "A valid password has to contain at least 8 characters. It must include a number, one upper and one lower letter."
+				];
+
+				exit(json_encode($response));
+			}
+
+			$new_password = EncryptPassword($new_password);
+			$sql =	"UPDATE `users` SET `password` = '$new_password' WHERE `email` = '$email'";
+			$query = $conn->query($sql);
+			$response["query"] = $sql;
+			$response["error"] = $conn->error;
+	
+			if (!$query)
+				exit(json_encode($response));
+		}
 
 		$sql =	"DELETE FROM `email_codes` WHERE `user_id` = $user[id]";
 		$query = $conn->query($sql);
@@ -87,6 +113,8 @@ if ($query->num_rows > 0)
 
 		if (!$query)
 			exit(json_encode($response));
+		
+	skip_code_delete:
 	}
 	else
 	{
