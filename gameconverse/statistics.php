@@ -43,7 +43,8 @@ $response = [
 	"result" => [
 		"impact" => "0",
 		"coins" => "0",
-		"level" => "1"
+		"level" => "1",
+		"tickets" => "0"
 	]
 ];
 
