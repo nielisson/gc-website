@@ -21,9 +21,9 @@ Header unset ETag
 FileETag None
 
 # Force SSL
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
+#RewriteEngine On
+#RewriteCond %{HTTPS} !=on
+#RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
 
 # Run HTML without filename extension
 RewriteEngine on

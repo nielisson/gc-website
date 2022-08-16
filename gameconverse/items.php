@@ -22,11 +22,10 @@ $response["message"] = "Bad Request. Some request fields are missing";
 switch ($_POST["request"])
 {
 	case "INSERT":
-		if (!isset($_POST["name"], $_POST["price"]))
+		if (!isset($_POST["name"], $_POST["icon_path"], $_POST["price"]))
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
-		$price = $_POST["price"];
 		$response = [
 			"query" => "SELECT * FROM `items` WHERE `name` = '$name' OR `name` LIKE '$name'",
 			"response" => "200",
@@ -48,7 +47,10 @@ switch ($_POST["request"])
 			break;
 		}
 		
-		$response["query"] = "INSERT INTO `items`(`name`, `price`) VALUES ('$name', $price)";
+		$price = $_POST["price"];
+		$icon_path = $_POST["icon_path"];
+		$icon_path = empty($icon_path) ? "NULL" : "'$icon_path'";
+		$response["query"] = "INSERT INTO `items`(`name`, `icon_path`, `price`) VALUES ('$name', $icon_path, $price)";
 
 		if (!$conn->query($response["query"]))
 		{
@@ -78,12 +80,11 @@ switch ($_POST["request"])
 		break;
 		
 	case "UPDATE":
-		if (!isset($_POST["id"], $_POST["name"], $_POST["price"]))
+		if (!isset($_POST["id"], $_POST["name"], $_POST["icon_path"], $_POST["price"]))
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
 		$name = strip_tags($_POST["name"]);
-		$price = $_POST["price"];
 		$response = [
 			"query" => "SELECT * FROM `items` WHERE `id` = $id",
 			"response" => "200",
@@ -105,8 +106,12 @@ switch ($_POST["request"])
 			break;
 		}
 		
+		$price = $_POST["price"];
+		$icon_path = $_POST["icon_path"];
+		$icon_path = empty($icon_path) ? "NULL" : "'$icon_path'";
 		$response["query"] = "UPDATE `items` SET
 			`name` = '$name',
+			`icon_path` = $icon_path,
 			`price` = $price
 		WHERE `id` = $id";
 
