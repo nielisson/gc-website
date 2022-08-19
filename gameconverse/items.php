@@ -22,7 +22,7 @@ $response["message"] = "Bad Request. Some request fields are missing";
 switch ($_POST["request"])
 {
 	case "INSERT":
-		if (!isset($_POST["name"], $_POST["icon_path"], $_POST["price"]))
+		if (!isset($_POST["name"], $_POST["type_id"], $_POST["sprite_path"], $_POST["icon_path"], $_POST["dependencies"], $_POST["dependency_alternative"], $_POST["price"]))
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
@@ -47,10 +47,31 @@ switch ($_POST["request"])
 			break;
 		}
 		
-		$price = $_POST["price"];
+		$type_id = $_POST["type_id"];
+		$sprite_path = $_POST["sprite_path"];
+		$sprite_path = empty($sprite_path) ? "NULL" : "'$sprite_path'";
 		$icon_path = $_POST["icon_path"];
 		$icon_path = empty($icon_path) ? "NULL" : "'$icon_path'";
-		$response["query"] = "INSERT INTO `items`(`name`, `icon_path`, `price`) VALUES ('$name', $icon_path, $price)";
+		$dependencies = $_POST["dependencies"];
+		$dependencies = empty($dependencies) ? "NULL" : "'$dependencies'";
+		$dependency_alternative = $_POST["dependency_alternative"];
+		$dependency_alternative = empty($dependency_alternative) ? "NULL" : $dependency_alternative;
+		$price = $_POST["price"];
+		$response["query"] = "INSERT INTO `items`(
+			`name`,
+			`type_id`,
+			`sprite_path`,
+			`icon_path`,
+			`dependencies`,
+			`price`
+		) VALUES (
+			'$name',
+			$type_id,
+			$sprite_path,
+			$icon_path,
+			$dependencies,
+			$price
+		)";
 
 		if (!$conn->query($response["query"]))
 		{
@@ -80,7 +101,7 @@ switch ($_POST["request"])
 		break;
 		
 	case "UPDATE":
-		if (!isset($_POST["id"], $_POST["name"], $_POST["icon_path"], $_POST["price"]))
+		if (!isset($_POST["id"], $_POST["name"], $_POST["type_id"], $_POST["sprite_path"], $_POST["icon_path"], $_POST["dependencies"], $_POST["dependency_alternative"], $_POST["price"]))
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
@@ -106,12 +127,23 @@ switch ($_POST["request"])
 			break;
 		}
 		
-		$price = $_POST["price"];
+		$type_id = $_POST["type_id"];
+		$sprite_path = $_POST["sprite_path"];
+		$sprite_path = empty($sprite_path) ? "NULL" : "'$sprite_path'";
 		$icon_path = $_POST["icon_path"];
 		$icon_path = empty($icon_path) ? "NULL" : "'$icon_path'";
+		$dependencies = $_POST["dependencies"];
+		$dependencies = empty($dependencies) ? "NULL" : "'$dependencies'";
+		$dependency_alternative = $_POST["dependency_alternative"];
+		$dependency_alternative = empty($dependency_alternative) ? "NULL" : $dependency_alternative;
+		$price = $_POST["price"];
 		$response["query"] = "UPDATE `items` SET
 			`name` = '$name',
+			`type_id` = $type_id,
+			`sprite_path` = $sprite_path,
 			`icon_path` = $icon_path,
+			`dependencies` = $dependencies,
+			`dependency_alternative` = $dependency_alternative,
 			`price` = $price
 		WHERE `id` = $id";
 
