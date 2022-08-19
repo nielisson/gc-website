@@ -8,8 +8,16 @@ require "phpmailer/src/Exception.php";
 require "phpmailer/src/PHPMailer.php";
 require "phpmailer/src/SMTP.php";
 
+$verification_mail_subject = "Account Activation";
+$password_reset_mail_subject = "Password Reset";
+$sender_name_long = "Games Converse Team";
+$sender_name_short = "Games Converse";
+
 function SendVerificationMail(string $to, string $name, string $code)
 {
+	global $verification_mail_subject;
+	global $sender_name_long;
+
 	$body = file_get_contents("mailer/email_verification.html");
 	$body = str_replace("%01%", $name, $body);
 	$body = str_replace("%02%", $code, $body);
@@ -19,15 +27,18 @@ function SendVerificationMail(string $to, string $name, string $code)
 	$message .= "Your account activation code is: <b>$code</b><br />";
 	$message .= "<br />";
 	$message .= "Best Regards,<br />";
-	$message .= "The GC Team.<br />";
+	$message .= "The $sender_name_long.<br />";
 	$message .= "<br />";
 	$message .= "<br />";
 	$message .= "<br />";
 
-	return SendMail($to, $name, "Account Activation", $body, $message, "noreply@gamesconverse.fun", true);
+	return SendMail($to, $name, $verification_mail_subject, $body, $message, "noreply@gamesconverse.fun", true);
 }
 function SendPasswordResetMail(string $to, string $name, string $code)
 {
+	global $password_reset_mail_subject;
+	global $sender_name_long;
+
 	$body = file_get_contents("mailer/password_reset.html");
 	$body = str_replace("%01%", $name, $body);
 	$body = str_replace("%02%", $code, $body);
@@ -39,16 +50,17 @@ function SendPasswordResetMail(string $to, string $name, string $code)
 	$message .= "If you think there's a problem, please contact us at support@gamesconverse.fun<br />";
 	$message .= "<br />";
 	$message .= "Best Regards,<br />";
-	$message .= "The GC Team.<br />";
+	$message .= "The $sender_name_long.<br />";
 	$message .= "<br />";
 	$message .= "<br />";
 	$message .= "<br />";
 
-	return SendMail($to, $name, "Password Reset", $body, $message, "noreply@gamesconverse.fun", true);
+	return SendMail($to, $name, $password_reset_mail_subject, $body, $message, "noreply@gamesconverse.fun", true);
 }
 function SendMail(string $to, string $name, string $subject, string $body, string $message, string $from, bool $is_html, ?string $reply_to = null)
 {
 	global $is_localhost;
+	global $sender_name_short;
 
 	if ($is_localhost)
 		return true;
@@ -76,8 +88,8 @@ function SendMail(string $to, string $name, string $subject, string $body, strin
 		$mail->Port			= $mailer_port;							// Port 587 for TLS; 465 for SSL
 		//Recipients
 		$mail->Sender		= $from;
-		$mail->setFrom($from, "GC Team");
-		$mail->addReplyTo($reply_to, "GC Team");
+		$mail->setFrom($from, $sender_name_short);
+		$mail->addReplyTo($reply_to, $sender_name_short);
 		$mail->addAddress($to, $name);								// Add a recipient
 		//Content
 		$mail->isHTML($is_html);									// Set email format to HTML
