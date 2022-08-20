@@ -90,14 +90,82 @@ foreach ($user_items as $user_item)
 	}
 }
 
+if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"], $_POST["tickets"]))
+{
+	$action_type = $_POST["new_action"];
+	$coins = $_POST["coins"];
+	$xp = $_POST["xp"];
+	$impact = $_POST["impact"];
+	$tickets = $_POST["tickets"];
+
+	$response = [
+		"response" => "500",
+		"message" => "We've had some internal errors!",
+		"query" => "INSERT INTO `users_actions`
+		(
+			`user_id`,
+			`type_id`,
+			`coins`,
+			`xp`,
+			`impact`,
+			`tickets`
+		) VALUES (
+			$user[id],
+			$action_type,
+			$coins,
+			$xp,
+			$impact,
+			$tickets	
+		)",
+		"result" => null
+	];
+	$query = $conn->query($response["query"]);
+	$response["error"] = $conn->error;
+	
+	if (!$query)
+		exit(json_encode($response));
+}
+
+$actions = ActionsList(intval($user["id"]));
+$coins = 0;
+$xp = 0;
+$level = 0;
+$impact = 0;
+$tickets = 0;
+
+foreach ($actions as $action)
+{
+	$coins += intval($action["coins"]);
+	$xp += intval($action["xp"]);
+	$impact += intval($action["impact"]);
+	$tickets += intval($action["tickets"]);
+}
+
+if ($xp < 100)
+	$level = 0;
+else if ($xp < 300)
+	$level = 1;
+else if ($xp < 750)
+	$level = 2;
+else if ($xp < 1400)
+	$level = 3;
+else
+{
+	$level = 4;
+
+	while ($xp > (100 * pow($level, 2)) - (50 * $level))
+		$level++;
+}
+
 $response = [
 	"response" => "200",
 	"message" => "Success",
 	"result" => [
-		"impact" => "0",
-		"coins" => "0",
-		"level" => "1",
-		"tickets" => "0",
+		"coins" => "$coins",
+		"xp" => "$xp",
+		"level" => "$level",
+		"impact" => "$impact",
+		"tickets" => "$tickets",
 		"bought_items" => $bought_items
 	]
 ];
