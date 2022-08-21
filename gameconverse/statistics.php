@@ -86,7 +86,7 @@ foreach ($user_items as $user_item)
 	{
 		$bought_items[] = $item["id"];
 
-		break;
+		continue;
 	}
 }
 

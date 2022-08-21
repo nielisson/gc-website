@@ -14,13 +14,61 @@ $response = [
 	"sql" => "None"
 ];
 
-if (!isset($_POST["request"]) || $_POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
+if (!isset($_POST["request"]) || $_POST["request"] !== "BUY" && _POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
 	exit(json_encode($response));
 
 $response["message"] = "Bad Request. Some request fields are missing";
 
 switch ($_POST["request"])
 {
+	case "BUY":
+		if (!isset($_POST["username"], $_POST["game_id"]))
+			exit(json_encode($response));
+
+		$username = $_POST["username"];
+		$response = [
+			"query" => "SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$username'",
+			"response" => "200",
+			"message" => "Success"
+		];
+
+		if (!($query = $conn->query($response["query"])))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+
+			break;
+		}
+		else if (!($user = $query->fetch_assoc()))
+		{
+			$response["response"] = "404";
+			$response["message"] = "Username doesn't exist";
+
+			break;
+		}
+
+		$game_id = $_POST["game_id"];
+		$response["query"] = "INSERT INTO `users_games`
+		(
+			`user_id`,
+			`game_id`
+		)
+		VALUES
+		(
+			$user[id],
+			$game_id
+		)";
+
+		if (!($query = $conn->query($response["query"])))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+
+			break;
+		}
+
+		break;
+
 	case "INSERT":
 		if (!isset($_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
 			exit(json_encode($response));

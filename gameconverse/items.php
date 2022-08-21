@@ -14,13 +14,61 @@ $response = [
 	"query" => "None"
 ];
 
-if (!isset($_POST["request"]) || $_POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
+if (!isset($_POST["request"]) || $_POST["request"] !== "BUY" && $_POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
 	exit(json_encode($response));
 
 $response["message"] = "Bad Request. Some request fields are missing";
 
 switch ($_POST["request"])
 {
+	case "BUY":
+		if (!isset($_POST["username"], $_POST["item_id"]))
+			exit(json_encode($response));
+
+		$username = $_POST["username"];
+		$response = [
+			"query" => "SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$username'",
+			"response" => "200",
+			"message" => "Success"
+		];
+
+		if (!($query = $conn->query($response["query"])))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+
+			break;
+		}
+		else if (!($user = $query->fetch_assoc()))
+		{
+			$response["response"] = "404";
+			$response["message"] = "Username doesn't exist";
+
+			break;
+		}
+
+		$item_id = $_POST["item_id"];
+		$response["query"] = "INSERT INTO `users_items`
+		(
+			`user_id`,
+			`item_id`
+		)
+		VALUES
+		(
+			$user[id],
+			$item_id
+		)";
+
+		if (!($query = $conn->query($response["query"])))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+
+			break;
+		}
+
+		break;
+
 	case "INSERT":
 		if (!isset($_POST["name"], $_POST["type_id"], $_POST["sprite_path"], $_POST["icon_path"], $_POST["dependencies"], $_POST["dependency_alternative"], $_POST["price"]))
 			exit(json_encode($response));
