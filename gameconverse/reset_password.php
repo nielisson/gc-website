@@ -125,7 +125,7 @@ if ($query->num_rows > 0)
 			"message" => "Sending the activation code mail has failed"
 		];
 
-		if (!SendPasswordResetMail($email, $user["full_name"], $user_code))
+		if (!SendPasswordResetMail($email, $user["nickname"], $user_code))
 			exit(json_encode($response));
 
 		if (isset($_POST["code"]))

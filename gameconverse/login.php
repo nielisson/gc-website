@@ -128,13 +128,13 @@ else if ($user_code !== null)
 	switch ($code_type)
 	{
 		case "password_reset":
-			if (!SendPasswordResetMail($user["email"], $user["full_name"], $user_code))
+			if (!SendPasswordResetMail($user["email"], $user["nickname"], $user_code))
 				exit(json_encode($response));
 
 			break;
 
 		default:
-			if (!SendVerificationMail($user["email"], $user["full_name"], $user_code))
+			if (!SendVerificationMail($user["email"], $user["nickname"], $user_code))
 				exit(json_encode($response));
 
 			break;

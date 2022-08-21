@@ -9,7 +9,7 @@ $response = [
 	$_POST = $_GET;*/
 
 // Check if all POST attributes are set
-if (!isset($_POST["username"], $_POST["password"], $_POST["email"], $_POST["full_name"], $_POST["country"], $_POST["genre"]))
+if (!isset($_POST["username"], $_POST["password"], $_POST["email"], $_POST["nickname"], $_POST["country"], $_POST["genre"]))
 	exit(json_encode($response));
 
 include "init.php";
@@ -18,7 +18,7 @@ include "init.php";
 $username = $_POST["username"];
 $password = $_POST["password"];
 $email = $_POST["email"];
-$full_name = $_POST["full_name"];
+$nickname = $_POST["nickname"];
 $country = intval($_POST["country"]);
 $genre = intval($_POST["genre"]);
 $response = [
@@ -42,7 +42,7 @@ if (!ValidateEmail($email))
 
 $response["message"] = "A valid Full Name is required";
 
-if (!ValidateName($full_name))
+if (!ValidateName($nickname))
 	exit(json_encode($response));
 
 $response["message"] = "A valid Country is required";
@@ -61,7 +61,7 @@ if ($genre < 0 || $genre >= count($genres))
 $username = SanitizeText($_POST["username"]);
 $password = EncryptPassword($_POST["password"]);
 $email = SanitizeEmail($_POST["email"]);
-$full_name = SanitizeText($_POST["full_name"]);
+$nickname = SanitizeText($_POST["nickname"]);
 // Increase country and genre indexes by one to match the ones in the database
 $country++;
 $genre++;
@@ -89,7 +89,7 @@ if ($query->num_rows > 0)
 
 // Insert user into database
 $time = (new DateTime())->format("Y-m-d H:i:s");
-$sql = "INSERT INTO `users`(`username`, `password`, `email`, `full_name`, `country`, `fav_game_genre`, `membership_time`) VALUES ('$username', '$password', '$email', '$full_name', $country, $genre, '$time')";
+$sql = "INSERT INTO `users`(`username`, `password`, `email`, `nickname`, `country`, `fav_game_genre`, `membership_time`) VALUES ('$username', '$password', '$email', '$nickname', $country, $genre, '$time')";
 $query = $conn->query($sql);
 $response = [
 	"response" => "500",
@@ -129,7 +129,7 @@ $response = [
 	"message" => "Sending the activation code mail has failed"
 ];
 
-if (!SendVerificationMail($email, $full_name, $code))
+if (!SendVerificationMail($email, $nickname, $code))
 {
 	// In case of failure delete the user & its own email code from the database
 	$conn->query("DELETE FROM `email_codes` WHERE `user_id` = $user_id");

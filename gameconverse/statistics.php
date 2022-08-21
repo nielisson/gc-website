@@ -93,6 +93,7 @@ foreach ($user_items as $user_item)
 if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"], $_POST["tickets"]))
 {
 	$action_type = $_POST["new_action"];
+	$item_id = isset($_POST["item_id"]) ? $_POST["item_id"] : null;
 	$coins = $_POST["coins"];
 	$xp = $_POST["xp"];
 	$impact = $_POST["impact"];
@@ -104,15 +105,17 @@ if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"],
 		"query" => "INSERT INTO `users_actions`
 		(
 			`user_id`,
-			`type_id`,
-			`coins`,
+			`type_id`," .
+			($item_id ? "`item_id`," : "")
+			. "`coins`,
 			`xp`,
 			`impact`,
 			`tickets`
 		) VALUES (
 			$user[id],
-			$action_type,
-			$coins,
+			$action_type," .
+			($item_id ? "$item_id," : "")
+			. "$coins,
 			$xp,
 			$impact,
 			$tickets	
@@ -127,9 +130,9 @@ if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"],
 }
 
 $actions = ActionsList(intval($user["id"]));
+$nickname = $user["nickname"];
 $coins = 0;
 $xp = 0;
-$level = 0;
 $impact = 0;
 $tickets = 0;
 
@@ -141,29 +144,13 @@ foreach ($actions as $action)
 	$tickets += intval($action["tickets"]);
 }
 
-if ($xp < 100)
-	$level = 0;
-else if ($xp < 300)
-	$level = 1;
-else if ($xp < 750)
-	$level = 2;
-else if ($xp < 1400)
-	$level = 3;
-else
-{
-	$level = 4;
-
-	while ($xp > (100 * pow($level, 2)) - (50 * $level))
-		$level++;
-}
-
 $response = [
 	"response" => "200",
 	"message" => "Success",
 	"result" => [
+		"nickname" => $nickname,
 		"coins" => "$coins",
 		"xp" => "$xp",
-		"level" => "$level",
 		"impact" => "$impact",
 		"tickets" => "$tickets",
 		"bought_items" => $bought_items
