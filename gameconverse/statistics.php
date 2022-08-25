@@ -46,6 +46,19 @@ $response = [
 if (!($user = $query->fetch_assoc()))
 	exit(json_encode($response));
 
+$last_login = (new DateTime("now", new DateTimeZone("UTC")))->format("Y-m-d H:i:s");
+$response = [
+	"response" => "500",
+	"message" => "We've had some internal errors!",
+	"query" => "UPDATE `users` SET `last_login` = '$last_login' WHERE `id` = $user[id]",
+	"result" => null
+];
+$query = $conn->query($response["query"]);
+$response["error"] = $conn->error;
+
+if (!$query)
+	exit(json_encode($response));
+
 $response = [
 	"response" => "500",
 	"message" => "We've had some internal errors!",
@@ -90,13 +103,12 @@ foreach ($user_items as $user_item)
 	}
 }
 
-if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"], $_POST["tickets"]))
+if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["tickets"]))
 {
 	$action_type = $_POST["new_action"];
 	$item_id = isset($_POST["item_id"]) ? $_POST["item_id"] : null;
 	$coins = $_POST["coins"];
 	$xp = $_POST["xp"];
-	$impact = $_POST["impact"];
 	$tickets = $_POST["tickets"];
 
 	$response = [
@@ -109,7 +121,6 @@ if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"],
 			($item_id ? "`item_id`," : "")
 			. "`coins`,
 			`xp`,
-			`impact`,
 			`tickets`
 		) VALUES (
 			$user[id],
@@ -117,7 +128,6 @@ if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["impact"],
 			($item_id ? "$item_id," : "")
 			. "$coins,
 			$xp,
-			$impact,
 			$tickets	
 		)",
 		"result" => null
@@ -140,9 +150,19 @@ foreach ($actions as $action)
 {
 	$coins += intval($action["coins"]);
 	$xp += intval($action["xp"]);
-	$impact += intval($action["impact"]);
+	$impact += max(intval($action["coins"]), 0);
 	$tickets += intval($action["tickets"]);
 }
+
+$impact = round($impact / 250.0);
+
+$all_actions = AllActionsList();
+$global_impact = 0;
+
+foreach ($all_actions as $action)
+	$global_impact += max(intval($action["coins"]), 0);
+
+$global_impact = round($global_impact / 250.0);
 
 $response = [
 	"response" => "200",
@@ -152,6 +172,7 @@ $response = [
 		"coins" => "$coins",
 		"xp" => "$xp",
 		"impact" => "$impact",
+		"global_impact" => "$global_impact",
 		"tickets" => "$tickets",
 		"bought_items" => $bought_items
 	]

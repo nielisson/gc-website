@@ -12,6 +12,18 @@ function ActionsList(int $user_id)
 
 	return $array;
 }
+function AllActionsList()
+{
+	global $conn;
+
+	$query = $conn->query("SELECT * FROM `users_actions`");
+	$array = [];
+
+	while ($query && $row = $query->fetch_assoc())
+		$array[] = $row;
+
+	return $array;
+}
 function GamesList()
 {
 	global $conn;
