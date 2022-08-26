@@ -103,10 +103,55 @@ foreach ($user_items as $user_item)
 	}
 }
 
+$response = [
+	"response" => "500",
+	"message" => "We've had some internal errors!",
+	"query" => "SELECT * FROM `users_games` WHERE `user_id` = $user[id]",
+	"result" => null
+];
+$query = $conn->query($response["query"]);
+$response["error"] = $conn->error;
+
+if (!$query)
+	exit(json_encode($response));
+
+$user_games = [];
+
+while ($row = $query->fetch_assoc())
+	$user_games[] = $row;
+
+$games = ItemsList();
+$bought_games = [];
+
+foreach ($user_games as $user_game)
+{
+	$game_id = intval($user_game["game_id"]);
+	$game = null;
+
+	foreach ($games as $i)
+		if (intval($i["id"]) === $game_id)
+		{
+			$game = $i;
+
+			break;
+		}
+
+	if (!$game)
+		continue;
+
+	if (!empty($game["price"]) && intval($game["price"]) > 0)
+	{
+		$bought_games[] = $game["id"];
+
+		continue;
+	}
+}
+
 if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["tickets"]))
 {
 	$action_type = $_POST["new_action"];
 	$item_id = isset($_POST["item_id"]) ? $_POST["item_id"] : null;
+	$game_id = isset($_POST["game_id"]) ? $_POST["game_id"] : null;
 	$coins = $_POST["coins"];
 	$xp = $_POST["xp"];
 	$tickets = $_POST["tickets"];
@@ -118,14 +163,16 @@ if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["tickets"]
 		(
 			`user_id`,
 			`type_id`," .
-			($item_id ? "`item_id`," : "")
+			($item_id ? "`item_id`," : "")  .
+			($game_id ? "`game_id`," : "")
 			. "`coins`,
 			`xp`,
 			`tickets`
 		) VALUES (
 			$user[id],
 			$action_type," .
-			($item_id ? "$item_id," : "")
+			($item_id ? "$item_id," : "") .
+			($game_id ? "$game_id," : "")
 			. "$coins,
 			$xp,
 			$tickets	
@@ -174,7 +221,8 @@ $response = [
 		"impact" => "$impact",
 		"global_impact" => "$global_impact",
 		"tickets" => "$tickets",
-		"bought_items" => $bought_items
+		"bought_items" => $bought_items,
+		"bought_games" => $bought_games
 	]
 ];
 

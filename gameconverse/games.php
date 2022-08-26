@@ -14,7 +14,7 @@ $response = [
 	"sql" => "None"
 ];
 
-if (!isset($_POST["request"]) || $_POST["request"] !== "BUY" && _POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
+if (!isset($_POST["request"]) || $_POST["request"] !== "BUY" && $_POST["request"] !== "INSERT" && $_POST["request"] !== "UPDATE" && $_POST["request"] !== "DELETE")
 	exit(json_encode($response));
 
 $response["message"] = "Bad Request. Some request fields are missing";
@@ -70,14 +70,16 @@ switch ($_POST["request"])
 		break;
 
 	case "INSERT":
-		if (!isset($_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
+		if (!isset($_POST["name"], $_POST["description"], $_POST["type_id"], $_POST["genre_id"], $_POST["icon_path"], $_POST["price"], $_POST["scene_path"]))
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
+		$description = $type_id < 2 ? "NULL" : "'$_POST[description]'";
 		$type_id = $_POST["type_id"];
 		$genre_id = $_POST["genre_id"];
+		$icon_path = $type_id < 2 ? "NULL" : "'$_POST[icon_path]'";
 		$price = $type_id < 2 ? "NULL" : $_POST["price"];
-		$scene_guid = strip_tags($_POST["scene_guid"]);
+		$scene_path = strip_tags($_POST["scene_path"]);
 		$response = [
 			"sql" => "SELECT * FROM `games` WHERE `name` = '$name' OR `name` LIKE '$name'",
 			"response" => "200",
@@ -99,7 +101,7 @@ switch ($_POST["request"])
 			break;
 		}
 		
-		$response["sql"] = "INSERT INTO `games` (`name`, `type_id`, `genre_id`, `price`, `scene_guid`) VALUES ('$name', $type_id, $genre_id, $price, '$scene_guid')";
+		$response["sql"] = "INSERT INTO `games` (`name`, `description`, `type_id`, `genre_id`, `icon_path`, `price`, `scene_path`) VALUES ('$name', $description, $type_id, $genre_id, $icon_path, $price, '$scene_path')";
 
 		if (!$conn->query($response["sql"]))
 		{
@@ -129,15 +131,17 @@ switch ($_POST["request"])
 		break;
 		
 	case "UPDATE":
-		if (!isset($_POST["id"], $_POST["name"], $_POST["type_id"], $_POST["genre_id"], $_POST["price"], $_POST["scene_guid"]))
+		if (!isset($_POST["id"], $_POST["name"], $_POST["description"], $_POST["type_id"], $_POST["genre_id"], $_POST["icon_path"], $_POST["price"], $_POST["scene_path"]))
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
 		$name = strip_tags($_POST["name"]);
+		$description = empty($_POST["description"]) ? "NULL" : "'$_POST[description]'";
 		$type_id = $_POST["type_id"];
 		$genre_id = $_POST["genre_id"];
+		$icon_path = empty($_POST["icon_path"]) ? "NULL" : "'$_POST[icon_path]'";
 		$price = $type_id < 2 ? "NULL" : $_POST["price"];
-		$scene_guid = strip_tags($_POST["scene_guid"]);
+		$scene_path = strip_tags($_POST["scene_path"]);
 		$response = [
 			"sql" => "SELECT * FROM `games` WHERE `id` = $id",
 			"response" => "200",
@@ -161,10 +165,12 @@ switch ($_POST["request"])
 		
 		$response["sql"] = "UPDATE `games` SET
 			`name` = '$name',
+			`description` = $description,
 			`type_id` = $type_id,
 			`genre_id` = $genre_id,
+			`icon_path` = $icon_path,
 			`price` = $price,
-			`scene_guid` = '$scene_guid'
+			`scene_path` = '$scene_path'
 		WHERE `id` = $id";
 
 		if (!$conn->query($response["sql"]))
