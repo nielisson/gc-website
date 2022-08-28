@@ -96,6 +96,18 @@ function CountriesList()
 
 	return $array;
 }
+function QuestsList()
+{
+	global $conn;
+
+	$query = $conn->query("SELECT * FROM `quests` ORDER BY `id`");
+	$array = [];
+
+	while ($query && $row = $query->fetch_assoc())
+		$array[] = $row;
+
+	return $array;
+}
 function DisposableEmailDomains()
 {
 	global $conn;
