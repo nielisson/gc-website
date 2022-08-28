@@ -48,13 +48,13 @@ if (!ValidateName($nickname))
 $response["message"] = "A valid Country is required";
 $countries = CountriesList();
 
-if ($country < 0 || $country >= count($countries))
+if ($country < 1 || $country > count($countries))
 	exit(json_encode($response));
 
 $response["message"] = "A valid Favorite Game Genre is required";
 $genres = GameGenresList();
 
-if ($genre < 0 || $genre >= count($genres))
+if ($genre < 1 || $genre > count($genres))
 	exit(json_encode($response));
 
 // Santize values to prevent errors
@@ -62,9 +62,6 @@ $username = SanitizeText($_POST["username"]);
 $password = EncryptPassword($_POST["password"]);
 $email = SanitizeEmail($_POST["email"]);
 $nickname = SanitizeText($_POST["nickname"]);
-// Increase country and genre indexes by one to match the ones in the database
-$country++;
-$genre++;
 
 // Check if the user exists already or not
 $sql = "SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$email'";

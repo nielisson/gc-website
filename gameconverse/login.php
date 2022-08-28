@@ -151,7 +151,8 @@ else if ($user_code !== null)
 
 $response = [
 	"response" => "200",
-	"message" => "Success"
+	"message" => "Success",
+	"email" => $user["email"]
 ];
 
 exit(json_encode($response));

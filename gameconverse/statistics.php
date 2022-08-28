@@ -11,24 +11,24 @@ $response = [
 	"result" => null
 ];
 
-if (!isset($_GET["username"]))
+if (!isset($_GET["identifier"]))
 	exit(json_encode($response));
 
-$username = $_GET["username"];
+$identifier = $_GET["identifier"];
 $response = [
 	"response" => "403",
 	"message" => "Username is not valid",
 	"result" => null
 ];
 
-if (!ValidateUsername($username) && !ValidateEmail($username))
+if (!ValidateUsername($identifier) && !ValidateEmail($identifier))
 	exit(json_encode($response));
 
-$username = SanitizeText($username);
+$identifier = SanitizeText($identifier);
 $response = [
 	"response" => "500",
 	"message" => "We've had some internal errors!",
-	"query" => "SELECT * FROM `users` WHERE `username` = '$username' OR `email` = '$username'",
+	"query" => "SELECT * FROM `users` WHERE `username` = '$identifier' OR `email` = '$identifier'",
 	"result" => null
 ];
 $query = $conn->query($response["query"]);
@@ -187,7 +187,10 @@ if (isset($_POST["new_action"], $_POST["coins"], $_POST["xp"], $_POST["tickets"]
 }
 
 $actions = ActionsList(intval($user["id"]));
+$username = $user["username"];
 $nickname = $user["nickname"];
+$country = $user["country"];
+$fav_game_genre = $user["fav_game_genre"];
 $coins = 0;
 $xp = 0;
 $impact = 0;
@@ -215,7 +218,10 @@ $response = [
 	"response" => "200",
 	"message" => "Success",
 	"result" => [
+		"username" => $username,
 		"nickname" => $nickname,
+		"country" => $country,
+		"fav_game_genre" => $fav_game_genre,
 		"coins" => "$coins",
 		"xp" => "$xp",
 		"impact" => "$impact",
