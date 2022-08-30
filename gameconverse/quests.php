@@ -22,7 +22,7 @@ $response["message"] = "Bad Request. Some request fields are missing";
 switch ($_POST["request"])
 {
 	case "INSERT":
-		if (!isset($_POST["name"], $_POST["description"], $_POST["period"], $_POST["start_at"], $_POST["end_at"], $_POST["target"], $_POST["target_game_id"], $_POST["target_value"], $_POST["reward"], $_POST["reward_item_id"], $_POST["reward_amount"]))
+		if (!isset($_POST["name"], $_POST["description"], $_POST["period"], $_POST["start_at"], $_POST["end_at"], $_POST["target"], $_POST["target_game_id"], $_POST["target_value"], $_POST["target_social_media"], $_POST["reward"], $_POST["reward_item_id"], $_POST["reward_amount"]))
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
@@ -32,7 +32,8 @@ switch ($_POST["request"])
 		$end_at = empty($_POST["end_at"]) ? "NULL" : "'$_POST[end_at]'";
 		$target = $_POST["target"];
 		$target_game_id = intval($_POST["target_game_id"]) < 1 ? "NULL" : $_POST["target_game_id"];
-		$target_value = intval($_POST["target_value"]) < 1 ? "NULL" : $_POST["target_value"];
+		$target_value = $_POST["target_value"];
+		$target_social_media = empty($_POST["target_social_media"]) || strtoupper($_POST["target_social_media"]) === "NONE" ? "NULL" : "'$_POST[target_social_media]'";
 		$reward = $_POST["reward"];
 		$reward_item_id = intval($_POST["reward_item_id"]) < 1 ? "NULL" : $_POST["reward_item_id"];
 		$reward_amount = intval($_POST["reward_amount"]) < 1 ? "NULL" : $_POST["reward_amount"];
@@ -114,7 +115,7 @@ switch ($_POST["request"])
 		break;
 		
 	case "UPDATE":
-		if (!isset($_POST["id"], $_POST["name"], $_POST["description"], $_POST["period"], $_POST["start_at"], $_POST["end_at"], $_POST["target"], $_POST["target_game_id"], $_POST["target_value"], $_POST["reward"], $_POST["reward_item_id"], $_POST["reward_amount"]))
+		if (!isset($_POST["id"], $_POST["name"], $_POST["description"], $_POST["period"], $_POST["start_at"], $_POST["end_at"], $_POST["target"], $_POST["target_game_id"], $_POST["target_value"], $_POST["target_social_media"], $_POST["reward"], $_POST["reward_item_id"], $_POST["reward_amount"]))
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
@@ -125,7 +126,8 @@ switch ($_POST["request"])
 		$end_at = empty($_POST["end_at"]) ? "NULL" : "'$_POST[end_at]'";
 		$target = $_POST["target"];
 		$target_game_id = intval($_POST["target_game_id"]) < 1 ? "NULL" : $_POST["target_game_id"];
-		$target_value = intval($_POST["target_value"]) < 1 ? "NULL" : $_POST["target_value"];
+		$target_value = $_POST["target_value"];
+		$target_social_media = empty($_POST["target_social_media"]) || strtoupper($_POST["target_social_media"]) === "NONE" ? "NULL" : "'$_POST[target_social_media]'";
 		$reward = $_POST["reward"];
 		$reward_item_id = intval($_POST["reward_item_id"]) < 1 ? "NULL" : $_POST["reward_item_id"];
 		$reward_amount = intval($_POST["reward_amount"]) < 1 ? "NULL" : $_POST["reward_amount"];
