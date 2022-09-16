@@ -73,7 +73,7 @@ switch ($_POST["request"])
 		if (!isset($_POST["name"], $_POST["type_id"], $_POST["sprite_path"], $_POST["icon_path"], $_POST["dependencies"], $_POST["dependency_alternative"], $_POST["price"]))
 			exit(json_encode($response));
 
-		$name = strip_tags($_POST["name"]);
+		$name = addslashes(strip_tags($_POST["name"]));
 		$response = [
 			"query" => "SELECT * FROM `items` WHERE `name` = '$name' OR `name` LIKE '$name'",
 			"response" => "200",
@@ -153,7 +153,7 @@ switch ($_POST["request"])
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
-		$name = strip_tags($_POST["name"]);
+		$name = addslashes(strip_tags($_POST["name"]));
 		$response = [
 			"query" => "SELECT * FROM `items` WHERE `id` = $id",
 			"response" => "200",

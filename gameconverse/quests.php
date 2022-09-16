@@ -25,8 +25,8 @@ switch ($_POST["request"])
 		if (!isset($_POST["name"], $_POST["description"], $_POST["period"], $_POST["start_at"], $_POST["end_at"], $_POST["target"], $_POST["target_game_id"], $_POST["target_value"], $_POST["target_social_media"], $_POST["reward"], $_POST["reward_item_id"], $_POST["reward_amount"]))
 			exit(json_encode($response));
 
-		$name = strip_tags($_POST["name"]);
-		$description = strip_tags($_POST["description"]);
+		$name = addslashes(strip_tags($_POST["name"]));
+		$description = addslashes(strip_tags($_POST["description"]));
 		$period = $_POST["period"];
 		$start_at = empty($_POST["start_at"]) ? "NULL" : "'$_POST[start_at]'";
 		$end_at = empty($_POST["end_at"]) ? "NULL" : "'$_POST[end_at]'";
@@ -119,8 +119,8 @@ switch ($_POST["request"])
 			exit(json_encode($response));
 
 		$id = $_POST["id"];
-		$name = strip_tags($_POST["name"]);
-		$description = strip_tags($_POST["description"]);
+		$name = addslashes(strip_tags($_POST["name"]));
+		$description = addslashes(strip_tags($_POST["description"]));
 		$period = $_POST["period"];
 		$start_at = empty($_POST["start_at"]) ? "NULL" : "'$_POST[start_at]'";
 		$end_at = empty($_POST["end_at"]) ? "NULL" : "'$_POST[end_at]'";
