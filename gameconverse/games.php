@@ -74,7 +74,7 @@ switch ($_POST["request"])
 			exit(json_encode($response));
 
 		$name = strip_tags($_POST["name"]);
-		$description = $type_id < 2 ? "NULL" : "'$_POST[description]'";
+		$description = empty($_POST["description"]) ? "NULL" : "'" . strip_tags($_POST["description"]) . "'";
 		$type_id = $_POST["type_id"];
 		$genre_id = $_POST["genre_id"];
 		$icon_path = $type_id < 2 ? "NULL" : "'$_POST[icon_path]'";
@@ -136,7 +136,7 @@ switch ($_POST["request"])
 
 		$id = $_POST["id"];
 		$name = strip_tags($_POST["name"]);
-		$description = empty($_POST["description"]) ? "NULL" : "'$_POST[description]'";
+		$description = empty($_POST["description"]) ? "NULL" : "'" . strip_tags($_POST["description"]) . "'";
 		$type_id = $_POST["type_id"];
 		$genre_id = $_POST["genre_id"];
 		$icon_path = empty($_POST["icon_path"]) ? "NULL" : "'$_POST[icon_path]'";
