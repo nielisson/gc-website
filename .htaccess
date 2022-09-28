@@ -61,6 +61,6 @@ RewriteRule ^([^/]+)/([^/]+)/([^/]+)/([^/]+)/?$ $1.php?get1=$2&get2=$3&get3=$4 [
 RewriteRule ^([^/]+)/([^/]+)/([^/]+)/([^/]+)/([^/]+)/?$ $1.php?get1=$2&get2=$3&get3=$4&get4=$5 [L,QSA]
 
 # Redirect 403 error
-ErrorDocument 403 https://gamesconverse.fun/403
+ErrorDocument 403 https://gamesconverse.space/403
 # Redirect 500 error
-ErrorDocument 500 https://gamesconverse.fun/500
+ErrorDocument 500 https://gamesconverse.space/500

@@ -1,8 +1,8 @@
 <?php
 
 // Connection parameters
+$is_localhost = strpos("localhost/", $_SERVER['HTTP_HOST']) !== false;
 $servername = "localhost";
-$is_localhost = str_contains("localhost/", $_SERVER['HTTP_HOST']);
 
 // Check if localhost
 if ($is_localhost)
@@ -13,9 +13,9 @@ if ($is_localhost)
 }
 else
 {
-	$username = "gameygmg_root";
-	$password = "GcGc2022-";
-	$dbname = "gameygmg_main";
+	$username = "gamehagx_root";
+	$password = "Gcgc2022*";
+	$dbname = "gamehagx_gc";
 }
 
 // Create connection

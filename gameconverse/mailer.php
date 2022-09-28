@@ -32,7 +32,7 @@ function SendVerificationMail(string $to, string $name, string $code)
 	$message .= "<br />";
 	$message .= "<br />";
 
-	return SendMail($to, $name, $verification_mail_subject, $body, $message, "noreply@gamesconverse.fun", true);
+	return SendMail($to, $name, $verification_mail_subject, $body, $message, "noreply@gamesconverse.space", true);
 }
 function SendPasswordResetMail(string $to, string $name, string $code)
 {
@@ -47,7 +47,7 @@ function SendPasswordResetMail(string $to, string $name, string $code)
 	$message .= "We've received your request to reset your account password!<br />";
 	$message .= "Your account activation code is: <b>$code</b><br />";
 	$message .= "<br />";
-	$message .= "If you think there's a problem, please contact us at support@gamesconverse.fun<br />";
+	$message .= "If you think there's a problem, please contact us at support@gamesconverse.space<br />";
 	$message .= "<br />";
 	$message .= "Best Regards,<br />";
 	$message .= "The $sender_name_long.<br />";
@@ -55,7 +55,7 @@ function SendPasswordResetMail(string $to, string $name, string $code)
 	$message .= "<br />";
 	$message .= "<br />";
 
-	return SendMail($to, $name, $password_reset_mail_subject, $body, $message, "noreply@gamesconverse.fun", true);
+	return SendMail($to, $name, $password_reset_mail_subject, $body, $message, "noreply@gamesconverse.space", true);
 }
 function SendMail(string $to, string $name, string $subject, string $body, string $message, string $from, bool $is_html, ?string $reply_to = null)
 {
@@ -69,9 +69,9 @@ function SendMail(string $to, string $name, string $subject, string $body, strin
 		$reply_to = $from;
 
 	// PHPMailer SMTP Configurations 
-	$mailer_host = "mail.gamesconverse.fun";
+	$mailer_host = "mail.gamesconverse.space";
 	$mailer_username = $from;
-	$mailer_password = "gcgc2022*";
+	$mailer_password = "Gcgc2022*";
 	$mailer_secure = $is_localhost ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
 	$mailer_port = $is_localhost ? 587 : 465;
 
