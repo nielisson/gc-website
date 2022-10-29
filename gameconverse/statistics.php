@@ -120,7 +120,7 @@ $user_games = [];
 while ($row = $query->fetch_assoc())
 	$user_games[] = $row;
 
-$games = ItemsList();
+$games = GamesList();
 $bought_games = [];
 
 foreach ($user_games as $user_game)
@@ -128,15 +128,15 @@ foreach ($user_games as $user_game)
 	$game_id = intval($user_game["game_id"]);
 	$game = null;
 
-	foreach ($games as $i)
-		if (intval($i["id"]) === $game_id)
+	foreach ($games as $g)
+		if (intval($g["id"]) === $game_id)
 		{
-			$game = $i;
+			$game = $g;
 
 			break;
 		}
 
-	if (!$game)
+	if ($game === null)
 		continue;
 
 	if (!empty($game["price"]) && intval($game["price"]) > 0)
