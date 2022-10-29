@@ -250,6 +250,30 @@ switch ($_POST["request"])
 			break;
 		}
 		
+		$response["sql"] = "UPDATE `users_actions` SET `item_id` = NULL WHERE `item_id` = $id";
+
+		if (!$conn->query($response["sql"]))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+		}
+		
+		$response["sql"] = "DELETE FROM `quests` WHERE `reward_item_id` = $id";
+
+		if (!$conn->query($response["sql"]))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+		}
+		
+		$response["sql"] = "DELETE FROM `users_items` WHERE `item_id` = $id";
+
+		if (!$conn->query($response["sql"]))
+		{
+			$response["response"] = "500";
+			$response["message"] = $conn->error;
+		}
+		
 		$response["query"] = "DELETE FROM `items` WHERE `id` = $id";
 
 		if (!$conn->query($response["query"]))
