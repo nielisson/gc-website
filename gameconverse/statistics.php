@@ -195,6 +195,7 @@ $coins = 0;
 $xp = 0;
 $impact = 0;
 $tickets = 0;
+$impact_negation = 0;
 
 foreach ($actions as $action)
 {
@@ -202,18 +203,21 @@ foreach ($actions as $action)
 	$xp += intval($action["xp"]);
 	$impact += max(intval($action["coins"]), 0);
 	$tickets += intval($action["tickets"]);
+	$impact_negation += intval($action["impact_negation"]);
 }
 
-$impact = round($impact / 250.0);
-
+$impact = round($impact / 250.0) - $impact_negation;
 $all_actions = AllActionsList();
 $global_impact = 0;
+$impact_negation = 0;
 
 foreach ($all_actions as $action)
+{
 	$global_impact += max(intval($action["coins"]), 0);
+	$impact_negation += intval($action["impact_negation"]);
+}
 
-$global_impact = round($global_impact / 250.0);
-
+$global_impact = max(round($global_impact / 250.0) - $impact_negation, 0);
 $response = [
 	"response" => "200",
 	"message" => "Success",
