@@ -52,10 +52,15 @@ for ($i = 0; $i < count($users); $i++)
 
 	foreach ($user_actions as $action)
 		if (($impact = intval($action["coins"])) > 0)
-			$user["impact"] += intval($impact);
+			$user["impact"] += $impact;
 
 	$user["is_player"] = $i === 0;
 	$user["impact"] = strval(round($user["impact"] / 250.0));
+
+	foreach ($user_actions as $action)
+		if (($impact_negation = intval($action["impact_negation"])) > 0)
+			$user["impact"] -= $impact_negation;
+
 	$users[$i] = $user;
 }
 	
