@@ -13,9 +13,9 @@ if ($is_localhost)
 }
 else
 {
-	$username = "gamehagx_root";
-	$password = "Gcgc2022*";
-	$dbname = "gamehagx_gc";
+	$username = "id21305204_root";
+	$password = "Gcgc2024?";
+	$dbname = "id21305204_gc";
 }
 
 // Create connection
